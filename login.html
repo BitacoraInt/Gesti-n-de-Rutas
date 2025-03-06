@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .login-container, .menu-container, .gestion-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px gray;
+        }
+
+        h2 {
+            color: #333;
+        }
+
+        input, select, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 8px;
+        }
+
+        button {
+            background: #28A745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .logo {
+            width: 300px;
+        }
+        .logo-pequeno {
+            width: 150px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="C:\Users\pc\Desktop\llantera\logo.jpg" alt="Logo" class="logo">
+        <h2>Inicio de Sesión</h2>
+        <form id="loginForm">
+            <label for="usuario">Usuario:</label>
+            <input type="text" id="usuario" required>
+            <label for="contrasena">Contraseña:</label>
+            <input type="password" id="contrasena" required>
+            <button type="submit">Entrar</button>
+        </form>
+        <img src="C:\Users\pc\Desktop\llantera\transporte.jpeg" alt="Transporte" class="logo-pequeno">
+    </div>
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const usuario = document.getElementById("usuario").value;
+            const contrasena = document.getElementById("contrasena").value;
+
+            const response = await fetch("http://localhost:3000/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ usuario, contrasena })
+            });
+
+            const data = await response.json();
+            console.log("Tipo de usuario recibido:", data.tipo); // Depuración
+
+            if (response.ok) {
+                localStorage.setItem("usuario", usuario);
+                localStorage.setItem("tipoUsuario", data.tipo);
+                window.location.href = "menu.html";
+            } else {
+                alert("Usuario o contraseña incorrectos");
+            }
+        });
+
+    </script>
+</body>
+</html>

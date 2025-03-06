@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Rutas</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>        
+      
+        .panel-lateral {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100%;
+            background: #f8f9fa;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            transition: right 0.3s ease-in-out;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .panel-lateral.mostrar {
+            right: 0;
+        }
+
+        .cerrar-panel {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: red;
+            font-weight: bold;
+        }   
+        h3 {
+            text-align: center;
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            display: block;
+            color: #555;
+        }
+
+        input, select {
+            width: 100%;
+            font-size: 18px;
+            padding: 12px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            margin-top: 5px;
+            background: white;
+        }
+        body {
+            background-color: white;
+        }
+        .logo {
+            display:flex;
+            margin: 1px auto;
+            width: 700px;
+            height: 300px;
+            object-fit: contain;
+        }
+        .btn-custom {
+            margin: 5px;
+            color: white;
+        }
+        
+        .btn-aplicar {
+            background-color: green;
+        }
+        
+        .btn-agregar {
+            background-color: green;
+        }
+        .btn-asignar {
+            background-color: blue;
+        }
+        .btn-exportar {
+            background-color: green;
+        }
+        .container { display: flex; width: 100%; transition: margin-left 0.2s}
+        .table-container { flex-grow: 1; overflow-y: auto; max-height: 65vh; min-height: 250px; transition: margin-left 0.3s; transition: margin-right 0.3s;}
+        @media (max-width: 768px) {
+            .detalle-panel {
+                width: 100%; 
+                position: fixed;
+                height: 100%;
+                left: 0;
+            }
+        }
+        .detalle-panel {
+            position: absolute;
+            top: 0;
+            left: 5px;
+            width: 350px;
+            height: 100%;
+            background-color: #f8f9fa;
+            border-left: 1px solid #ddd;
+            padding: 20px;
+            display: none;
+            overflow-y: auto;
+            box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+        .detalle-panel h2 { text-align: center; }
+        
+        .datetime-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .datetime-container input {
+            width: 100%;
+            font-size: 20px;
+            padding: 10px;
+        }
+
+        .datetime-container .btn-aceptar {
+            background: green;
+            color: white;
+            border: none; 
+            padding: 5px 10px;
+            cursor: pointer;
+            display: none;
+            font-size: 16px;
+        }
+        .fila-verde td {
+            background-color: green !important;
+            color: white !important;
+        }
+        .fila-amarilla td {
+            background-color: yellow !important;
+            color: black !important;
+        }
+        .fila-roja td {
+            background-color: red !important;
+            color: white !important;
+        }
+        .fila-gris td {
+            background-color: gray !important;
+            color: white !important;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="C:\Users\pc\Desktop\llantera\logo.jpg" alt="Logo" class="logo">
+    </header>
+    <div class="container">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <input type="text" id="inputBusqueda" class="form-control" placeholder="Buscar...">
+            </div>
+            <div class="col-md-8 d-flex align-items-center">
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="filtroAsignadas">
+                    <label class="form-check-label" for="filtroAsignadas">Asignadas</label>
+                </div>
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="filtroSinAsignar">
+                    <label class="form-check-label" for="filtroSinAsignar">Sin asignar</label>
+                </div>
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="filtroCanceladas">
+                    <label class="form-check-label" for="filtroCanceladas">Canceladas</label>
+                </div>
+                <div class="form-check me-3">
+                    <input class="form-check-input" type="checkbox" id="filtroTerminadas">
+                    <label class="form-check-label" for="filtroTerminadas">Terminadas</label>
+                </div>
+                <button class="btn btn-custom btn-aplicar" id="btnAplicarFiltro">Aplicar Filtros</button>
+            </div>
+        </div>
+    </div>
+    <div id="panelExportar" class="panel-lateral">
+        <span id="cerrarPanelExportar" class="cerrar-panel">&times;</span>
+        <h3>Exportar Histórico</h3>
+        
+        <label for="fechaInicio">Fecha Inicio:</label>
+        <input type="date" id="fechaInicio">
+    
+        <label for="fechaFin">Fecha Fin:</label>
+        <input type="date" id="fechaFin">
+    
+        <label for="estatusFiltro">Estatus:</label>
+        <select id="estatusFiltro">
+            <option value="">Todos</option>
+            <option value="Asignada">Asignada</option>
+            <option value="Sin asignar">Sin asignar</option>
+            <option value="Terminada">Terminada</option>
+            <option value="Cancelada">Cancelada</option>
+        </select>
+    
+        <button id="btnExportar" disabled>Exportar</button>
+    </div>
+    <div class="table-container">
+        <table class="table table-striped" id="tablaRutas">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ruta</th>
+                    <th>Tracking</th>
+                    <th>Cporte</th>
+                    <th>Bol</th>
+                    <th>Origen-Destino</th>
+                    <th>Fecha Cita</th>
+                    <th>Cliente</th>
+                    <th>Unidad</th>
+                    <th>Caja</th>
+                    <th>Operador</th>
+                    <th>Estatus</th>
+                    <th>Fec real llegada</th>
+                    <th>Fec real salida</th>
+                    <th>Comentarios</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+    <div class="text-center">
+        <button class="btn btn-custom btn-agregar" id="agregarRutaBtn">Agregar Ruta</button>
+        <button class="btn btn-custom btn-asignar" id="asignarRutaBtn">Asignar Ruta</button>
+        <button class="btn btn-custom btn-exportar" id="abrirFiltroExportar">Exportar Histórico</button>
+    </div>
+    <div class="detalle-panel" id="detallePanel">
+        <h2>Detalles de la Ruta</h2>
+        <span class="cerrar-panel" id="cerrarDetalle" aria-setsize="300px">&times;</span>
+        <form id="detalleForm">
+            <div id="detalleContenido"></div>
+            <button type="button" id="guardarCambios">Guardar Cambios</button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            const usuario = localStorage.getItem("usuario");
+            const tipoUsuario = localStorage.getItem("tipoUsuario");
+
+            console.log("Usuario actual:", usuario);
+            console.log("Tipo de usuario:", tipoUsuario);
+
+            if (!usuario || !tipoUsuario) {
+                window.location.href = "login.html";
+                return;
+            }
+
+            aplicarRestricciones(tipoUsuario);
+        });
+
+        function aplicarRestricciones(tipoUsuario) {
+            if (tipoUsuario === "lectura") {
+                deshabilitarAcciones();
+            }
+        }
+
+        function deshabilitarAcciones() {
+            const botones = [
+                "agregarRutaBtn", 
+                "asignarRutaBtn", 
+                "btnExportarHistorico"
+            ];
+
+            const acciones = [
+                "cancelarRuta",
+                "terminarRuta"
+            ];
+
+            // Deshabilitar botones principales
+            botones.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.style.opacity = "0.5";
+                    btn.style.cursor = "not-allowed";
+                }
+            });
+
+            // Deshabilitar funciones de cancelar y terminar ruta
+            acciones.forEach(func => {
+                window[func] = function() {
+                    alert("No tienes permisos para realizar esta acción.");
+                };
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", function () {
+                const abrirFiltroExportar = document.getElementById("abrirFiltroExportar");
+                const panelExportar = document.getElementById("panelExportar");
+                const cerrarPanelExportar = document.getElementById("cerrarPanelExportar");
+                const btnExportar = document.getElementById("btnExportar");
+
+                const fechaInicio = document.getElementById("fechaInicio");
+                const fechaFin = document.getElementById("fechaFin");
+                const estatusFiltro = document.getElementById("estatusFiltro");
+
+                // Mostrar el panel lateral al hacer clic en el botón
+                abrirFiltroExportar.addEventListener("click", function () {
+                    panelExportar.classList.add("mostrar");
+                });
+
+                // Cerrar el panel lateral
+                cerrarPanelExportar.addEventListener("click", function () {
+                    panelExportar.classList.remove("mostrar");
+                });
+
+                // Habilitar el botón de exportar solo si hay filtros seleccionados
+                function validarFiltros() {
+                    btnExportar.disabled = !(fechaInicio.value || fechaFin.value || estatusFiltro.value);
+                }
+
+                fechaInicio.addEventListener("change", validarFiltros);
+                fechaFin.addEventListener("change", validarFiltros);
+                estatusFiltro.addEventListener("change", validarFiltros);
+
+                // Función para exportar el histórico con los filtros seleccionados
+                btnExportar.addEventListener("click", async function () {
+                    const fechaInicioVal = fechaInicio.value;
+                    const fechaFinVal = fechaFin.value;
+                    const estatusVal = estatusFiltro.value;
+
+                    const params = new URLSearchParams();
+                    if (fechaInicioVal) params.append("fechaInicio", fechaInicioVal);
+                    if (fechaFinVal) params.append("fechaFin", fechaFinVal);
+                    if (estatusVal) params.append("estatus", estatusVal);
+
+                    try {
+                        const response = await fetch(`http://localhost:3000/api/exportar_historico?${params.toString()}`);
+
+                        if (!response.ok) {
+                            throw new Error("Error al generar el archivo.");
+                        }
+
+                        const blob = await response.blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = "historico.xlsx";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+
+                        alert("El archivo historico.xlsx se ha descargado correctamente.");
+                        panelExportar.classList.remove("mostrar");
+                    } catch (error) {
+                        console.error("Error al exportar el histórico:", error);
+                        alert("No se pudo generar el archivo.");
+                    }
+                });
+            });
+
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarRutas();
+            function abrirModal(id) {
+                document.getElementById(id).style.display = "block";
+            }
+
+            function cerrarModal(id) {
+                document.getElementById(id).style.display = "none";
+            }
+            
+            document.getElementById("asignarRutaBtn").addEventListener("click", () => { 
+                window.location.href="asignar.html";
+            });
+            document.getElementById("agregarRutaBtn").addEventListener("click", () => { 
+                window.location.href="agregar.html";
+            });
+            document.getElementById("inputBusqueda").addEventListener("keyup", aplicarFiltro);
+            document.getElementById("btnAplicarFiltro").addEventListener("click", aplicarFiltro);
+            
+            function mostrarMenuContextual(event, fila) {
+                event.preventDefault();
+                const  menuexistente = document.querySelector(".dropdown-menu.show");
+                if (menuexistente){
+                    menuexistente.remove();
+                }
+                const tracking = fila.cells[1].textContent;
+                const estatus = fila.cells[10].textContent;
+
+                const menu = document.createElement("div");
+                menu.className = "dropdown-menu show";
+                menu.style.position = "absolute";
+                menu.style.left = `${event.pageX}px`;
+                menu.style.top = `${event.pageY}px`;
+                menu.innerHTML = `
+                    <button class="dropdown-item" onclick="cancelarRuta('${tracking}')">Cancelar Ruta</button>
+                    <button class="dropdown-item" onclick="terminarRuta('${tracking}', '${estatus}')">Terminar Ruta</button>
+                    <button class="dropdown-item" onclick="mostrarDetalle('${tracking}', '${estatus}')">Mostrar Más Características</button>
+                `;
+                if (localStorage.getItem("tipoUsuario") === "lectura") {
+                    menu.innerHTML = `
+                    <button class="dropdown-item" onclick="mostrarDetalle('${tracking}', '${estatus}')">Mostrar Más Características</button>
+                `;
+                }
+                else{
+                    menu.innerHTML = `
+                    <button class="dropdown-item" onclick="cancelarRuta('${tracking}')">Cancelar Ruta</button>
+                    <button class="dropdown-item" onclick="terminarRuta('${tracking}', '${estatus}')">Terminar Ruta</button>
+                    <button class="dropdown-item" onclick="mostrarDetalle('${tracking}', '${estatus}')">Mostrar Más Características</button>
+                `;
+                }
+                document.body.appendChild(menu);
+                document.addEventListener("click", () => menu.remove(), { once: true });
+                
+            }
+
+            window.terminarRuta = async function terminarRuta(tracking, estatus) {
+
+                if (estatus === "Terminada" || estatus === "Cancelada") {
+                    alert("No se puede terminar la ruta porque ya está terminada o cancelada.");
+                    return;
+                }
+
+                const confirmar = confirm(`¿Seguro que quieres terminar la ruta? con tracking: ${tracking}`);
+                if (!confirmar) return;
+
+                try {
+                    const response = await fetch("http://localhost:3000/api/terminar_ruta", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ tracking })
+                    });
+
+                    if (!response.ok) {
+                        const resultado = await response.json();
+                        throw new Error(resultado.error || "Error al terminar la ruta");
+                    }
+
+                    alert("La ruta ha sido marcada como terminada y movida a histórico.");
+                    actualizarFilaDesdeBD(tracking, "historico");
+                } catch (error) {
+                    console.error("Error al terminar la ruta:", error);
+                    alert("Error al terminar la ruta. Inténtalo de nuevo.");
+                }
+            };
+
+            window.cancelarRuta = async function cancelarRuta(tracking, estatus) {
+                if (estatus === "Terminada" || estatus === "Cancelada") {
+                    alert("No se puede cancelar la ruta porque ya está terminada o cancelada.");
+                    return;
+                }
+
+                const confirmar = confirm("¿Seguro que quieres cancelar la ruta?");
+                if (!confirmar) return;
+
+                try {
+                    const response = await fetch("http://localhost:3000/api/cancelar_ruta", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ tracking })
+                    });
+
+                    if (!response.ok) {
+                        const resultado = await response.json();
+                        throw new Error(resultado.error || "Error al cancelar la ruta");
+                    }
+
+                    alert("La ruta ha sido cancelada y movida a histórico.");
+                    actualizarFilaDesdeBD(tracking, "historico");
+                } catch (error) {
+                    console.error("Error al cancelar la ruta:", error);
+                    alert("Error al cancelar la ruta. Inténtalo de nuevo.");
+                }
+            };
+
+            document.getElementById("cerrarDetalle").addEventListener("click", () => {
+                document.getElementById("detallePanel").style.display = "none";
+                document.querySelector(".table-container").style.marginLeft = "0";
+            });            
+
+            function aplicarFiltro() {
+                const textoBusqueda = document.getElementById("inputBusqueda").value.toLowerCase();
+                const filtros = {
+                    texto: textoBusqueda,
+                    asignadas: document.getElementById("filtroAsignadas").checked,
+                    sin_asignar: document.getElementById("filtroSinAsignar").checked,
+                    canceladas: document.getElementById("filtroCanceladas").checked,
+                    terminadas: document.getElementById("filtroTerminadas").checked,
+                };
+                cargarRutas(filtros);
+            }
+
+            function formatearFechaParaInput(fechaStr) {
+                if (!fechaStr || fechaStr === "null") return "";
+
+                const fecha = new Date(fechaStr);
+                if (isNaN(fecha.getTime())) return "";
+                const fechaLocal = new Date(fecha.getTime() - fecha.getTimezoneOffset() * 60000);
+                return fechaLocal.toISOString().slice(0, 16); // Formato: "YYYY-MM-DDTHH:mm"
+            }
+
+            function mostrarDetalle(tracking, estatus) {
+                const panel = document.getElementById("detallePanel");
+                panel.style.display = "block";
+                document.querySelector(".table-container").style.marginLeft = "360px";
+
+                fetch(`http://localhost:3000/api/detalle_tracking?tracking=${tracking}&estatus=${estatus}`)
+                    .then(response => response.json())
+                    .then(datos => {
+                        const detalleContenido = document.getElementById("detalleContenido");
+                        detalleContenido.innerHTML = "";
+
+                        Object.entries(datos).forEach(([clave, valor]) => {
+                            const campo = document.createElement("div");
+                            let inputType = "text";
+
+                            if (clave.includes("Fec") || clave === "Fecha_Cita") {
+                                inputType = "datetime-local";
+                                valor = formatearFechaParaInput(valor); // Formatear fecha antes de mostrarla
+                            }
+
+                            const readOnlyKeys = ["Id", "Bol", "Cliente", "Ruta", "Origen/Destino", "Diesel", "Utilidad", "Porcentaje Utilidad", "Fec Terminada"];
+                            const readOnlyAttr = readOnlyKeys.includes(clave) ? "readonly" : "";
+
+                            campo.innerHTML = `
+                                <label>${clave}</label>
+                                <input type="${inputType}" name="${clave}" value="${valor || ""}" class="form-control" data-original="${valor || ""}" ${readOnlyAttr}>
+                            `;
+                            detalleContenido.appendChild(campo);
+                        });
+
+                        configurarCamposBloqueados();
+
+                        document.getElementById("guardarCambios").setAttribute("data-tracking", tracking);
+                        document.getElementById("guardarCambios").setAttribute("data-estatus", estatus);
+                        if (localStorage.getItem("tipoUsuario") === "lectura") {
+                            document.getElementById("guardarCambios").disabled = true;
+                        }
+                    })
+                    .catch(error => console.error("Error al mostrar detalles:", error));
+            }
+            
+            document.getElementById("guardarCambios").addEventListener("click", async function () {
+                const tracking = this.getAttribute("data-tracking");
+                const estatus = this.getAttribute("data-estatus");
+                const tabla = (estatus === "Terminada" || estatus === "Cancelada") ? "historico" : "rutas";
+
+                if (!tracking || !estatus) {
+                    alert("Faltan los datos de tracking o estatus.");
+                    return;
+                }
+
+                const cambios = {};
+                document.querySelectorAll("#detalleContenido input").forEach(input => {
+                    const valorOriginal = input.getAttribute("data-original");
+                    const valorActual = input.value;
+
+                    // Solo agregar al objeto de cambios si el valor ha cambiado
+                    if (valorActual !== valorOriginal) {
+                        cambios[input.name] = valorActual;
+                    }
+                });
+
+                if (Object.keys(cambios).length === 0) {
+                    alert("No hay cambios para guardar.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch("http://localhost:3000/api/actualizar_tracking", {
+                        method: "PUT",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ tracking, tabla, cambios })
+                    });
+
+                    if (!response.ok) throw new Error("Error al actualizar la base de datos.");
+
+                    actualizarFilaDesdeBD(tracking, tabla);
+
+                    document.getElementById("detallePanel").style.display = "none";
+                    document.querySelector(".table-container").style.marginLeft = "0";
+
+                } catch (error) {
+                    console.error("Error al guardar cambios:", error);
+                }
+            });
+            
+            function colorearFila(fila, datos) {
+                console.log("📌 Datos recibidos en colorearFila:", datos);
+
+                if (!datos || typeof datos !== "object") {
+                    console.error("❌ Datos inválidos en colorearFila:", datos);
+                    fila.classList.add("fila-gris");
+                    return;
+                }
+
+                const estatus = datos.Estatus;
+                let fechaCitaStr = datos.Fecha_Cita && datos.Fecha_Cita !== "/" ? datos.Fecha_Cita : null;
+                let fecRealLlegadaStr = datos.Fec_real_llegada && datos.Fec_real_llegada !== "/" ? datos.Fec_real_llegada : null;
+
+                // 📌 Obtener la fecha y hora actual en zona horaria de CDMX
+                const fechaActual = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Mexico_City" }));
+
+                // 📌 Convertir fechas a objetos Date
+                const fechaCita = fechaCitaStr ? new Date(fechaCitaStr) : null;
+                const fecRealLlegada = fecRealLlegadaStr ? new Date(fecRealLlegadaStr) : null;
+
+                console.log("📌 Fecha actual:", fechaActual.toISOString());
+                console.log("📌 Fecha Cita:", fechaCita ? fechaCita.toISOString() : "❌ No definida");
+                console.log("📌 Fec_real_llegada:", fecRealLlegada ? fecRealLlegada.toISOString() : "❌ No definida");
+
+                if (!fechaCita || isNaN(fechaCita.getTime())) {
+                    console.warn(`⚠️ Fecha_Cita inválida para tracking ${datos.Tracking}:`, fechaCitaStr);
+                    fila.classList.add("fila-gris");
+                    return;
+                }
+
+                let diferenciaSegundos = null;
+
+                if (estatus === "Asignada" || estatus === "Sin asignar") {
+                    diferenciaSegundos = (fechaActual - fechaCita) / 1000;
+                    console.log(`📌 Diferencia con Fecha_Cita (${estatus}):`, diferenciaSegundos, "segundos");
+                } else if (estatus === "Terminada" || estatus === "Cancelada") {
+                    if (!fecRealLlegada || isNaN(fecRealLlegada.getTime())) {
+                        console.warn(`⚠️ Fec_real_llegada inválida para tracking ${datos.Tracking}:`, fecRealLlegadaStr);
+                        fila.classList.add("fila-gris");
+                        return;
+                    }
+                    diferenciaSegundos = (fecRealLlegada - fechaCita) / 1000;
+                    console.log(`📌 Diferencia con Fec_real_llegada (${estatus}):`, diferenciaSegundos, "segundos");
+                } else {
+                    console.warn(`⚠️ Estatus desconocido: ${estatus}`);
+                    fila.classList.add("fila-gris");
+                    return;
+                }
+                fila.classList.remove("fila-verde", "fila-amarilla", "fila-roja", "fila-gris");
+
+                if (diferenciaSegundos < 0) {
+                    fila.classList.add("fila-verde"); // A tiempo
+                } else if (diferenciaSegundos >= 0 && diferenciaSegundos <= 7200) {
+                    fila.classList.add("fila-amarilla"); // Va tarde
+                } else if (diferenciaSegundos > 7200) {
+                    fila.classList.add("fila-roja"); // Retraso
+                }
+
+                console.log("✅ Fila coloreada correctamente:", fila.classList);
+            }
+
+            function actualizarFilaDesdeBD(tracking, tabla_origen) {
+                axios.get(`http://localhost:3000/api/actualizar_fila?tracking=${tracking}&tabla_origen=${tabla_origen}`)
+                    .then(response => {
+                        const datos = response.data;
+                        if (datos.error) {
+                            console.error("Error:", datos.error);
+                            alert(datos.error);
+                            return;
+                        }
+
+                        if (!datos || typeof datos !== "object") {
+                            console.error("Datos no válidos:", datos);
+                            return;
+                        }
+
+                        const filas = document.querySelectorAll("#tablaRutas tbody tr");
+                        filas.forEach(fila => {
+                            if (fila.cells[1].textContent === tracking) {
+                                const columnas = [
+                                    "Ruta", "Tracking", "Cporte", "Bol", "Origen_Destino",
+                                    "Fecha_Cita", "Cliente", "Unidad", "Caja", "Operador",
+                                    "Estatus", "Fec_real_llegada", "Fec_real_salida", "Comentarios"
+                                ];
+                                columnas.forEach((columna, index) => {
+                                    if (datos[columna] !== undefined) {
+                                        let valor = datos[columna];
+
+                                        if (columna.includes("Fec") || columna === "Fecha_Cita") {
+                                            if (!valor || valor === "null") {
+                                                fila.cells[index].textContent = "/";
+                                            } else {
+                                                const fecha = new Date(valor);
+                                                fila.cells[index].textContent = !isNaN(fecha.getTime()) 
+                                                    ? fecha.toLocaleString("es-MX", { timeZone: "America/Mexico_City" }) 
+                                                    : "/";
+                                            }
+                                        } else {
+                                            fila.cells[index].textContent = valor || "/";
+                                        }
+                                    }
+                                });
+
+                                colorearFila(fila, datos);
+                            }
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error al actualizar fila:", error);
+                        alert("Error al actualizar fila. Por favor, inténtalo de nuevo.");
+                    });
+            }
+
+            function cargarRutas(filtros = {}) {
+                const params = new URLSearchParams();
+                if (filtros.texto) params.append('textoBusqueda', filtros.texto);
+
+                const estatus = [];
+                if (filtros.asignadas) estatus.push('Asignada');
+                if (filtros.sin_asignar) estatus.push('Sin asignar');
+                if (filtros.canceladas) estatus.push('Cancelada');
+                if (filtros.terminadas) estatus.push('Terminada');
+
+                if (estatus.length > 0) params.append('estatus', estatus.join(','));
+
+                axios.get("http://localhost:3000/api/consultar_rutas", { params })
+                    .then((response) => {
+                        const datos = response.data;
+                        const tabla = document.querySelector("#tablaRutas tbody");
+                        tabla.innerHTML = "";  
+
+                        const columnas = [
+                            "Ruta", "Tracking", "Cporte", "Bol", "Origen_Destino",
+                            "Fecha_Cita", "Cliente", "Unidad", "Caja", "Operador",
+                            "Estatus", "Fec_real_llegada", "Fec_real_salida", "Comentarios"
+                        ];
+
+                        datos.forEach((filaArray) => {
+                            const fila = document.createElement("tr");
+
+                            const filaObjeto = {};
+                            columnas.forEach((columna, index) => {
+                                filaObjeto[columna] = filaArray[index] || "/";
+                            });
+
+                            filaArray.forEach((dato, index) => {
+                                const celda = document.createElement("td");
+                                if (index === 5 || index === 11 || index === 12) { 
+                                    celda.textContent = formatearFechaUTC(dato);
+                                } else {
+                                    celda.textContent = dato || "/";
+                                }
+                                fila.appendChild(celda);
+                            });
+
+                            fila.addEventListener("contextmenu", (event) => mostrarMenuContextual(event, fila));
+                            tabla.appendChild(fila);
+
+                            colorearFila(fila, filaObjeto);
+                        });
+                    })
+                    .catch((error) => {
+                        console.error("Error al cargar rutas:", error);
+                    });
+            }
+
+            function formatearFechaUTC(fechaStr) {
+                if (!fechaStr || fechaStr === "/") return "/";
+
+                const fecha = new Date(fechaStr);
+                if (isNaN(fecha.getTime())) return "/";
+
+                return fecha.toLocaleString("es-MX", { timeZone: "America/Mexico_City" });
+            }
+
+            function configurarCamposBloqueados() {
+                const camposBloqueados = [
+                    "Tracking", "Bol", "Cliente", 
+                    "Fecha Cita", "C_Porte", "Unidad", "Caja", 
+                    "Nombre Operador"
+                ];
+                
+                document.querySelectorAll("#detalleContenido input").forEach(input => {
+                    if (camposBloqueados.includes(input.name)) {
+                        input.setAttribute("readonly", true); 
+
+                        input.addEventListener("dblclick", (event) => {
+                            event.preventDefault(); 
+                            const confirmar = confirm("¿Seguro que quieres modificar este campo?");
+                            if (confirmar) {
+                                input.removeAttribute("readonly");
+                                input.focus(); 
+                            }
+                        });
+                    }
+                });
+            }
+                
+                window.mostrarDetalle = mostrarDetalle;
+            });
+    </script>
+    </body>
+</html>
+

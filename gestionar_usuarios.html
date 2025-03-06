@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="usuarios.js"></script>
+</head>
+<body>
+    <div class="gestion-container">
+        <h2>Gestión de Usuarios</h2>
+        <form id="formAgregarUsuario">
+            <label for="nuevoUsuario">Usuario:</label>
+            <input type="text" id="nuevoUsuario" required>
+            <label for="nuevaContrasena">Contraseña:</label>
+            <input type="password" id="nuevaContrasena" required>
+            <label for="tipoUsuario">Tipo de Usuario:</label>
+            <select id="tipoUsuario">
+                <option value="administrador">Administrador</option>
+                <option value="usuario">Usuario</option>
+                <option value="lectura">Lectura</option>
+            </select>
+            <button type="submit">Agregar Usuario</button>
+        </form>
+        <button onclick="volverMenu()">Volver al Menú</button>
+    </div>
+    <script>   
+        document.getElementById("formAgregarUsuario").addEventListener("submit", async function(event) {
+            event.preventDefault();
+
+            const nuevoUsuario = document.getElementById("nuevoUsuario").value;
+            const nuevaContrasena = document.getElementById("nuevaContrasena").value;
+            const tipoUsuario = document.getElementById("tipoUsuario").value;
+
+            const response = await fetch("http://localhost:3000/api/agregar_usuario", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ usuario: nuevoUsuario, contrasena: nuevaContrasena, tipo: tipoUsuario })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                alert("Usuario agregado correctamente");
+                document.getElementById("formAgregarUsuario").reset();
+            } else {
+                alert("Error al agregar usuario");
+            }
+        });
+
+        function volverMenu() {
+            window.location.href = "menu.html";
+        }
+    </script>
+</body>
+</html>

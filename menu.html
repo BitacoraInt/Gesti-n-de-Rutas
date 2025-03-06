@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú Principal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="menu-container">
+        <h2>Menú Principal</h2>
+        <button onclick="abrirIndex()">Abrir Aplicación</button>
+        <button id="btnGestionarUsuarios" onclick="abrirGestionUsuarios()">Gestionar Usuarios</button>
+        <button id="btnGestionarCajas" onclick="abrirGestionCajas()" style="display: none;">Gestionar Cajas</button>
+        <button id="btnGestionarOperadores" onclick="abrirGestionOperadores()" style="display: none;">Gestionar Operadores</button>
+        <button id="btnGestionarUnidades" onclick="abrirGestionUnidades()" style="display: none;">Gestionar Unidades</button>
+        <button onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const tipoUsuario = localStorage.getItem("tipoUsuario");
+            console.log("Tipo de usuario en localStorage:", tipoUsuario);
+            if (!tipoUsuario) {
+                window.location.href = "login.html";
+            }
+
+            if (tipoUsuario !== "administrador") {
+                document.getElementById("btnGestionarUsuarios").style.display = "none";
+                document.getElementById("btnGestionarCajas").style.display = "none";
+                document.getElementById("btnGestionarOperadores").style.display = "none";
+                document.getElementById("btnGestionarUnidades").style.display = "none";
+            }
+            else {
+                btnGestionarUsuarios.style.display = "block";
+                btnGestionarCajas.style.display = "block";
+                btnGestionarOperadores.style.display = "block";
+                btnGestionarUnidades.style.display = "block";
+            }
+                    
+        });
+        function abrirIndex() {
+            window.location.href = "index.html";
+        }
+
+        function abrirGestionUsuarios() {
+            window.location.href = "gestionar_usuarios.html";
+        }
+
+        function abrirGestionCajas() {
+            window.location.href = "gestionar_cajas.html";
+        }
+
+        function abrirGestionOperadores() {
+            window.location.href = "gestionar_operadores.html";
+        }
+
+        function abrirGestionUnidades() {
+            window.location.href = "gestionar_unidades.html";
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>

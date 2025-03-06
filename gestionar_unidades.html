@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Unidades</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Gestión de Unidades</h2>
+        <label for="numeroUnidad">Número de Unidad:</label>
+        <input type="text" id="numeroUnidad">
+        <button onclick="agregarUnidad()">Agregar</button>
+        <button onclick="volverMenu()">Volver</button>
+    </div>
+
+    <script>
+        async function agregarUnidad() {
+            let numeroUnidad = document.getElementById("numeroUnidad").value.trim();
+            if (!numeroUnidad) {
+                alert("El campo no puede estar vacío.");
+                return;
+            }
+
+            let response = await fetch("http://localhost:3000/agregar_unidad", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ numero_unidad: numeroUnidad })
+            });
+
+            let data = await response.json();
+            alert(data.mensaje);
+            if (response.ok) document.getElementById("numeroUnidad").value = "";
+        }
+
+        function volverMenu() {
+            window.location.href = "menu.html";
+        }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asignar Ruta</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <div class="btn-container">
+    <button id="btnRegresar" onclick="regresar()" title="Volver a la página principal">⬅</button>
+  </div>
+  <div id="asignarRuta" class="form-container">
+    <h2>Asignar Ruta</h2>
+    <form id="formAsignarRuta">
+      <label for="ruta">Ruta:</label>
+      <select id="ruta" required></select><br>
+      <label for="fechaCita">Fecha de Cita:</label>
+      <input type="date" id="fechaCita" required><br>
+      <label for="horaCita">Hora de Cita:</label>
+      <input type="time" id="horaCita" required><br>
+      <label for="vol">Bol:</label>
+      <input type="text" id="vol"><br>
+      <label for="cPorte" name="cPorte">C Porte:</label>
+      <input type="text" id="cPorte"><br>
+      <label for="unidad">Unidad:</label>
+      <select id="unidad" name="id_unidad"></select><br>
+      <label for="caja">Caja:</label>
+      <select id="caja" name="id_caja"></select><br>
+      <label for="operador">Operador:</label>
+      <select id="operador" name="id_operador"></select><br>
+      <button type="submit">Asignar Ruta</button>
+    </form>
+  </div>
+<script>
+    function habilitarBusquedaEnSelect(selectId) {
+      const select = document.getElementById(selectId);
+      const searchInput = document.createElement('input');
+      searchInput.setAttribute('type', 'text');
+      searchInput.setAttribute('placeholder', 'Buscar...');
+      searchInput.style.width = '100%';
+      searchInput.style.marginBottom = '5px';
+      select.parentNode.insertBefore(searchInput, select);
+      searchInput.addEventListener('input', () => {
+        const searchValue = searchInput.value.toLowerCase();
+        Array.from(select.options).forEach(option => {
+          if (option.textContent.toLowerCase().includes(searchValue)) {
+            option.style.display = '';
+          } else {
+            option.style.display = 'none';
+          }
+        });
+      });
+    }
+    document.addEventListener('DOMContentLoaded', () => {
+      habilitarBusquedaEnSelect('ruta');
+      habilitarBusquedaEnSelect('unidad');
+      habilitarBusquedaEnSelect('caja');
+      habilitarBusquedaEnSelect('operador');
+    });
+  </script>
+  <script>
+      function regresar(){
+        window.location.href = "index.html";
+      }
+      async function cargarRutasSinAsignar() {
+          const rutaSelect = document.getElementById('ruta');
+          const rutas = await fetch('http://localhost:3000/api/crutas').then(res => res.json());
+          rutas.forEach(ruta => {
+              const option = document.createElement('option');
+              option.value = ruta.id_ruta;
+              option.textContent = `${ruta.tracking} - ${ruta.ruta}`;
+              rutaSelect.appendChild(option);
+          });
+      }
+      cargarRutasSinAsignar();
+      async function cargarDatos() {
+          const [operadores, cajas, unidades] = await Promise.all([
+              fetch('http://localhost:3000/api/operadores').then(res => res.json()),
+              fetch('http://localhost:3000/api/cajas').then(res => res.json()),
+              fetch('http://localhost:3000/api/unidades').then(res => res.json())
+          ]);
+  
+          const operadorSelect = document.getElementById('operador');
+          const cajaSelect = document.getElementById('caja');
+          const unidadSelect = document.getElementById('unidad');
+  
+          operadores.forEach(op => {
+              const option = document.createElement('option');
+              option.value = op.id_operador;
+              option.textContent = op.nombre_operador;
+              operadorSelect.appendChild(option);
+          });
+  
+          cajas.forEach(caja => {
+              const option = document.createElement('option');
+              option.value = caja.id_caja;
+              option.textContent = caja.numero_caja;
+              cajaSelect.appendChild(option);
+          });
+  
+          unidades.forEach(unidad => {
+              const option = document.createElement('option');
+              option.value = unidad.id_unidad;
+              option.textContent = unidad.numero_unidad;
+              unidadSelect.appendChild(option);
+          });
+      }
+      cargarDatos();
+      document.getElementById('formAsignarRuta').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id_ruta = document.getElementById("ruta").value;
+        const fechaCita = document.getElementById("fechaCita").value;
+        const horaCita = document.getElementById("horaCita").value;
+        const cPorte = document.getElementById("cPorte").value;
+        const id_operador = document.getElementById("operador").value;
+        const id_caja = document.getElementById("caja").value;
+        const id_unidad = document.getElementById("unidad").value;
+        const vol = document.getElementById("vol").value;
+
+        const horaCita24Horas = convertirHoraA24Horas(horaCita) + ":00";
+        const fecha_cita_nueva = `${fechaCita} ${horaCita24Horas}`;
+
+        const response = await fetch("http://localhost:3000/api/asignar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id_ruta,
+            fecha_cita: fecha_cita_nueva,
+            cporte: cPorte,
+            id_unidad,
+            id_caja,
+            id_operador,
+            vol,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (data.requiereConfirmacion) {
+          const confirmarCambio = confirm(data.mensaje);
+
+          const bodyConfirmacion = {
+            id_ruta,
+            fecha_cita: confirmarCambio ? fecha_cita_nueva : data.fecha_cita_existente,
+            cporte: cPorte,
+            id_unidad,
+            id_caja,
+            id_operador,
+            vol,
+            confirmar_cambio: true,
+          };
+
+          const responseConfirmar = await fetch('http://localhost:3000/api/asignar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(bodyConfirmacion),
+          });
+
+          if (responseConfirmar.ok) {
+            alert(
+              confirmarCambio
+                ? "Ruta asignada con la nueva fecha."
+                : "Ruta asignada manteniendo la fecha anterior."
+            );
+          } else {
+            alert('Error al asignar la ruta.');
+          }
+        } else if (response.ok) {
+          alert('Ruta asignada correctamente.');
+        } else {
+          alert('Error al asignar la ruta.');
+        }
+      });
+      function convertirHoraA24Horas(hora) {
+        if (hora.includes("AM") || hora.includes("PM")) {
+          const [time, meridian] = hora.split(" ");
+          let [hours, minutes] = time.split(":").map(Number);
+
+          if (meridian === "PM" && hours !== 12) {
+            hours += 12;
+          } else if (meridian === "AM" && hours === 12) {
+            hours = 0;
+          }
+
+          return `${hours.toString().padStart(2, "0")}:${minutes
+            .toString()
+            .padStart(2, "0")}`;
+        }
+        return hora;
+      }
+  </script>
+</body>
+</html>

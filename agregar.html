@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agregar Ruta</title>
+    <style>
+        .btn-container {
+            position: fixed;
+            top: 5px;
+            left: 150px;
+            transform: scale(3);
+        }
+        #btnRegresar {
+            display: flex;
+            top: 10px; left: 2px;
+            left: 20px;
+            color: black;
+            font-size: 50px; 
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 20px;
+            align-items: center;  
+        }
+        #btnRegresar:hover {
+            color: blue;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: auto;
+            padding: 20px;
+            justify-content: center;
+        }
+
+        form {
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            width: 400px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+            color: #555555;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #27a02d;
+        }
+        h3{
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="btn-container">
+        <button id="btnRegresar" onclick="regresar()" title="Volver a la página principal">⬅</button>
+    </div>
+    <h1>Agregar Nueva Ruta</h1>
+    <form id="ruta-form">
+        <label for="tracking">Tracking:</label>
+        <input type="text" id="tracking" name="tracking" required>
+        <label for="cliente">Cliente:</label>
+        <select id="cliente" name="cliente" required>Selecciona un cliente</select>
+        <label for="ruta">Ruta:</label>
+        <select id="ruta" name="ruta" required></select>
+        <button type="submit">Guardar</button>
+    </form>
+
+    <h3>Cargar Archivo</h3>
+    <input type="file" id="archivo-input" accept=".csv, .xlsx, .xls">
+    <button id="procesar-archivo">Procesar Archivo</button>
+
+    <script>
+        async function cargarClientes() {
+            const clientes = await fetch('http://localhost:3000/api/clientes').then(res => res.json());
+            const clienteSelect = document.getElementById('cliente');
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "Selecciona un cliente";
+            clienteSelect.appendChild(defaultOption);
+
+            // Agregar las opciones de los clientes
+            clientes.forEach(cliente => {
+                const option = document.createElement('option');
+                option.value = cliente.nombre_cliente;
+                option.textContent = cliente.nombre_cliente;
+                clienteSelect.appendChild(option);
+            });
+        }
+
+        document.getElementById('cliente').addEventListener('change', async (e) => {
+            const clienteSeleccionado = e.target.value;
+            const response = await fetch(`http://localhost:3000/api/nuevarutas?cliente=${clienteSeleccionado}`);
+            const rutas = await response.json();
+            const rutaSelect = document.getElementById('ruta');
+            rutaSelect.innerHTML = '';
+            rutas.forEach(ruta => {
+                const option = document.createElement('option');
+                option.value = ruta;
+                option.textContent = ruta;
+                rutaSelect.appendChild(option);
+            });
+        });
+
+        document.getElementById('ruta-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const response = await fetch('http://localhost:3000/api/rutas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            if (result.success) {
+                alert('Ruta guardada correctamente');
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        });
+        function regresar(){
+            window.location.href = "index.html";
+        }
+        document.getElementById('procesar-archivo').addEventListener('click', async () => {
+            const archivoInput = document.getElementById('archivo-input');
+            if (!archivoInput.files[0]) {
+                alert('Selecciona un archivo');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('archivo', archivoInput.files[0]);
+
+            const response = await fetch('http://localhost:3000/api/procesar-archivo', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Archivo procesado correctamente');
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        });
+
+        cargarClientes();
+    </script>
+</body>
+</html>

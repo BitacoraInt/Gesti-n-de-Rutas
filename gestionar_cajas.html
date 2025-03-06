@@ -1,0 +1,43 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Cajas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Gestión de Cajas</h2>
+        <label for="numeroCaja">Número de Caja:</label>
+        <input type="text" id="numeroCaja">
+        <button onclick="agregarCaja()">Agregar</button>
+        <button onclick="volverMenu()">Volver</button>
+    </div>
+
+    <script>
+        async function agregarCaja() {
+            let numeroCaja = document.getElementById("numeroCaja").value.trim();
+            if (!numeroCaja) {
+                alert("El campo no puede estar vacío.");
+                return;
+            }
+
+            let response = await fetch("http://localhost:3000/agregar_caja", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ numero_caja: numeroCaja })
+            });
+
+            let data = await response.json();
+            alert(data.mensaje);
+            if (response.ok) document.getElementById("numeroCaja").value = "";
+        }
+
+        function volverMenu() {
+            window.location.href = "menu.html";
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: auto;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.form-container {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  width: 400px;
+}
+
+h2 {
+  text-align: center;
+  color: #333333;
+}
+.logo {
+  display:flex;
+  margin: 1px auto;
+  width: 700px;
+  height: 300px;
+  object-fit: contain;
+}
+h3{
+  text-align: center;
+}
+form {
+  display: flex;
+  flex-direction: column;
+}
+label {
+  display: block;
+  margin-top: 10px;
+  color: #555555;
+}
+
+input, select, button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+select {
+  font-size: 14px;
+  height: 45px;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #27a02d;
+}
+
+select:focus, input:focus, button:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.btn-container {
+  position: fixed;
+  top: 5px;
+  left: 150px;
+  transform: scale(3);
+}
+#btnRegresar {
+  display: flex;
+  top: 10px; left: 2px;
+  left: 20px;
+  color: black;
+  font-size: 50px; 
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 20px;
+  align-items: center;  
+}
+
+#btnRegresar:hover {
+  color: blue;
+}
+
+
