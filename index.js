@@ -15,7 +15,7 @@ app.use(express.static('frontend'));
 app.use(fileUpload());
 
 const config2 = mysql.createPool({
-  host: "192.168.1.251",
+  host: "186.95.149.118",
   user: "usuario",
   password: "admin",
   database: "llantas",
