@@ -1,6 +1,5 @@
 import { connect } from '@planetscale/database'
 const express = require("express");
-const mysql = require("mysql2/promise");
 const fileUpload = require('express-fileupload');
 const ExcelJS = require("exceljs");
 const bcrypt = require("bcryptjs");
