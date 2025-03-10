@@ -1,3 +1,4 @@
+import { connect } from '@planetscale/database'
 const express = require("express");
 const mysql = require("mysql2/promise");
 const fileUpload = require('express-fileupload');
@@ -13,7 +14,7 @@ app.use(cors());
 app.use(express.static('frontend'));
 app.use(fileUpload());
 
-const pool_ll = mysql.createPool({
+const config2 = mysql.createPool({
   host: "192.168.1.251",
   user: "usuario",
   password: "admin",
@@ -23,7 +24,7 @@ const pool_ll = mysql.createPool({
   queueLimit: 0,
 });
 
-const pool = mysql.createPool({
+const config = mysql.createPool({
   host: "192.168.1.251", 
   user: "usuario",
   password: "admin",
@@ -32,7 +33,8 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
 });
-
+const pool = connect(config)
+const pool_ll = connect(config)
 app.post("/api/login", async (req, res) => {
     const { usuario, contrasena } = req.body;
     
