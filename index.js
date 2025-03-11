@@ -16,6 +16,7 @@ app.use(fileUpload());
 const pool_ll = mysql.createPool({
   host: "186.95.149.118",
   user: "usuario",
+  port: 3306,
   password: "admin",
   database: "llantas",
   waitForConnections: true,
@@ -27,6 +28,7 @@ const pool = mysql.createPool({
   host: "186.95.149.118", 
   user: "usuario",
   password: "admin",
+  port: 3306,
   database: "servicios",
   waitForConnections: true,
   connectionLimit: 10,
