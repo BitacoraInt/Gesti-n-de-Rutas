@@ -16,7 +16,6 @@ app.use(fileUpload());
 const pool_ll = mysql.createPool({
   host: "186.95.149.118",
   user: "usuario",
-  port: 3306,
   password: "admin",
   database: "llantas",
   waitForConnections: true,
@@ -28,7 +27,6 @@ const pool = mysql.createPool({
   host: "186.95.149.118", 
   user: "usuario",
   password: "admin",
-  port: 3306,
   database: "servicios",
   waitForConnections: true,
   connectionLimit: 10,
@@ -1039,6 +1037,6 @@ app.post("/agregar_unidad", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Servidor ejecutándose en http://0.0.0.0:${PORT}`);
 });
