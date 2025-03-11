@@ -7,7 +7,7 @@ const cors = require("cors");
 const app = express();
 const xlsx= require('xlsx');
 app.use(express.json());
-const PORT = 3000;
+const PORT = 3306;
 const moment = require("moment");
 app.use(cors());
 app.use(express.static('frontend'));
