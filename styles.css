@@ -20,6 +20,8 @@ body {
   position: fixed;
   top: 15px;
   left: 100px;
+  height: 250px;
+  width: 200px;
 }
 h2 {
   text-align: center;
