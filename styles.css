@@ -18,8 +18,8 @@ body {
 }
 .header{
   position: fixed;
-  top: 5px;
-  left: 150px;
+  top: 15px;
+  left: 100px;
 }
 h2 {
   text-align: center;
