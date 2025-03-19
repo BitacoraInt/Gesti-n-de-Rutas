@@ -22,9 +22,9 @@ body {
   left: 100px;
 }
 img{
-  height: 250px;
-  width: 200px;
-  border-radious:2px;
+  height: 200px;
+  width: 180px;
+  border-radius: 4px;
 }
 h2 {
   text-align: center;
