@@ -16,7 +16,11 @@ body {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
   width: 400px;
 }
-
+.header{
+  position: fixed;
+  top: 5px;
+  left: 150px;
+}
 h2 {
   text-align: center;
   color: #333333;
